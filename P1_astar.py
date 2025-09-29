@@ -104,7 +104,52 @@ class AStar(object):
         """
         neighbors = []
         ########## Code starts here ##########
-        raise NotImplementedError("get_neighbors not implemented")
+        
+        res = self.resolution #resolution of movement
+        #temp is a variable used to store the snapped coordinates
+
+        #upper left quadrant
+        temp = self.snap_to_grid((x[0]-res,x[1]+res))
+        if (self.is_free(temp) ):
+            neighbors.append(temp)
+
+        #top quadrant
+        temp = self.snap_to_grid((x[0],x[1]+res))
+        if (self.is_free(temp) ):
+            neighbors.append(temp)
+
+        #upper right quadrant
+        temp = self.snap_to_grid((x[0]+res,x[1]+res))
+        if (self.is_free(temp) ):
+            neighbors.append(temp)
+
+
+        #left quadrant
+        temp = self.snap_to_grid((x[0]-res,x[1]))
+        if (self.is_free(temp) ):
+            neighbors.append(temp)
+
+        #right quadrant
+        temp = self.snap_to_grid((x[0]+res,x[1]))
+        if (self.is_free(temp) ):
+            neighbors.append(temp)
+
+        #bottom left quadrant
+        temp = self.snap_to_grid((x[0]-res,x[1]-res))
+        if (self.is_free(temp) ):
+            neighbors.append(temp)
+
+        #bottom quadrant
+        temp = self.snap_to_grid((x[0],x[1]-res))
+        if (self.is_free(temp) ):
+            neighbors.append(temp)
+
+        #bottom right quadrant
+        temp = self.snap_to_grid((x[0]+res,x[1]-res))
+        if (self.is_free(temp) ):
+            neighbors.append(temp)
+
+
         ########## Code ends here ##########
         return neighbors
 
