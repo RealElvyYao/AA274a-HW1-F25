@@ -40,7 +40,20 @@ class AStar(object):
               useful here
         """
         ########## Code starts here ##########
-        raise NotImplementedError("is_free not implemented")
+        if (x[0] < self.statespace_lo[0] or x[0] > self.statespace_hi[0]):
+            return False
+        elif (x[1] < self.statespace_lo[1] or x[1] > self.statespace_hi[1]):
+            return False
+        
+        for obs in self.occupancy.obstacles:
+            if x[0] >= obs[0][0] - self.occupancy.width * .01 and \
+               x[0] <= obs[1][0] + self.occupancy.width * .01 and \
+               x[1] >= obs[0][1] - self.occupancy.height * .01 and \
+               x[1] <= obs[1][1] + self.occupancy.height * .01:
+                return False
+        
+        return True
+
         ########## Code ends here ##########
 
     def distance(self, x1, x2):
@@ -55,7 +68,7 @@ class AStar(object):
         HINT: This should take one line. Tuples can be converted to numpy arrays using np.array().
         """
         ########## Code starts here ##########
-        raise NotImplementedError("distance not implemented")
+        return np.linalg.norm(np.array(x1)-np.array(x2))
         ########## Code ends here ##########
 
     def snap_to_grid(self, x):
