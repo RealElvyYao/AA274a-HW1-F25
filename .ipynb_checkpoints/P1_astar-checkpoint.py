@@ -214,31 +214,7 @@ class AStar(object):
                 set membership efficiently using the syntax "if item in set".
         """
         ########## Code starts here ##########
-        self.open_set.add(self.x_init)
-        self.cost_to_arrive[self.x_init] = 0
-        self.est_cost_through[self.x_init] = self.distance(self.x_init,self.x_goal)
-        while len(self.open_set) > 0:
-            xCurrent = self.find_best_est_cost_through()
-            if xCurrent == self.x_goal:
-                self.path = self.reconstruct_path()
-                return True
-            self.open_set.remove(xCurrent)
-            self.closed_set.add(xCurrent)
-            xNeighbors = self.get_neighbors(xCurrent)
-            for xNeigh in xNeighbors:
-                if xNeigh in self.closed_set:
-                    continue
-                tentative_cost_to_arrive =  self.cost_to_arrive[xCurrent] + self.distance(xCurrent,xNeigh)
-                if xNeigh not in self.open_set:
-                    self.open_set.add(xNeigh)
-                elif tentative_cost_to_arrive > self.cost_to_arrive[xNeigh]:
-                    continue
-                self.came_from[xNeigh] = xCurrent
-                self.cost_to_arrive[xNeigh] = tentative_cost_to_arrive
-                self.est_cost_through[xNeigh] = tentative_cost_to_arrive+self.distance(xNeigh,self.x_goal)
-
-        return False
-
+        raise NotImplementedError("solve not implemented")
         ########## Code ends here ##########
 
 class DetOccupancyGrid2D(object):
