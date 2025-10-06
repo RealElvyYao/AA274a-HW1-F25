@@ -99,14 +99,29 @@ class RRT(object):
         #          [x_init, ..., x_goal] such that the global trajectory made by linking steering
         #          trajectories connecting the states in order is obstacle-free.
 
-        ## Hints:
+        ## Hints:  
         #   - use the helper functions find_nearest, steer_towards, and is_free_motion
         #   - remember that V and P always contain max_iters elements, but only the first n
         #     are meaningful! keep this in mind when using the helper functions!
         #   - the order in which you pass in arguments to steer_towards and is_free_motion is important
 
         ########## Code starts here ##########
-
+        for k in range(max_iters):
+            z = np.random.uniform(0,1)
+            if z < goal_bias:
+                xRand = self.x_goal #sample goal
+            else:
+                xRand = np.random.uniform(self.statespace_lo,self.statespace_hi) #generate random state
+            xNear = V[GeometricRRT.find_nearest(self,V[:n,:],xRand)] #find nearest node and store it in xNEar
+            xNew = GeometricRRT.steer_towards(self,xNear,xRand,eps)
+            if GeometricRRT.is_free_motion(self,self.obstacles,xNear,xRand):
+                V[n,:] = xNew #add vertex
+                P[n,:] = xNear #store parent
+                if xNew == self.xGoal:
+                    break #found path, no need for more iterations
+                else:
+                    n = n+1 #increment n
+                
         ########## Code ends here ##########
 
         plt.figure()
@@ -127,7 +142,7 @@ class RRT(object):
         return success
 
     def plot_problem(self):
-        plot_line_segments(self.obstacles, color="red", linewidth=2, label="obstacles")
+        plot_line_segments(self.obstacles, color="r", linewidth=2, label="obstacles")
         plt.scatter([self.x_init[0], self.x_goal[0]], [self.x_init[1], self.x_goal[1]], color="green", s=30, zorder=10)
         plt.annotate(r"$x_{init}$", self.x_init[:2] + [.2, 0], fontsize=16)
         plt.annotate(r"$x_{goal}$", self.x_goal[:2] + [.2, 0], fontsize=16)
@@ -155,16 +170,51 @@ class GeometricRRT(RRT):
 
     def find_nearest(self, V, x):
         # Consult function specification in parent (RRT) class.
+        """
+        Given a list of states V and a query state x, returns the index (row)
+        of V such that the steering distance (subject to robot dynamics) from
+        V[i] to x is minimized
+
+        Inputs:
+            V: list/np.array of states ("samples")
+            x - query state
+        Output:
+            Integer index of nearest point in V to x
+        """
         ########## Code starts here ##########
         # Hint: This should take 1-3 line.
-
+        shortestDistance = float('inf')
+        for i in range(len(V)):
+            distance = np.linalg.norm(V[i] - x)
+            if distance < shortestDistance:
+                shortestDistance = distance
+                shortestDistanceIndex = i
+        return shortestDistanceIndex
         ########## Code ends here ##########
+    
         pass
 
     def steer_towards(self, x1, x2, eps):
         # Consult function specification in parent (RRT) class.
+        """
+        Steers from x1 towards x2 along the shortest path (subject to robot
+        dynamics). Returns x2 if the length of this shortest path is less than
+        eps, otherwise returns the point at distance eps along the path from
+        x1 to x2.
+
+        Inputs:
+            x1: start state
+            x2: target state
+            eps: maximum steering distance
+        Output:
+            State (numpy vector) resulting from bounded steering
+        """
         ########## Code starts here ##########
         # Hint: This should take 1-4 line.
+        if np.linalg.norm(x1-x2) <= eps: #length of shortest path is less than eps
+            return x2
+        else: #return point at eps along x1 to x2
+            return x1 + eps/np.linalg.norm(x1-x2) * (x2-x1)
 
         ########## Code ends here ##########
         pass
