@@ -112,13 +112,21 @@ class RRT(object):
                 xRand = self.x_goal #sample goal
             else:
                 xRand = np.random.uniform(self.statespace_lo,self.statespace_hi) #generate random state
-            xNear = V[GeometricRRT.find_nearest(self,V[:n,:],xRand)] #find nearest node and store it in xNEar
+            iNear = GeometricRRT.find_nearest(self,V[:n,:],xRand) #find nearest node and store it in iNEar
+            xNear = V[iNear,:]
             xNew = GeometricRRT.steer_towards(self,xNear,xRand,eps)
             if GeometricRRT.is_free_motion(self,self.obstacles,xNear,xRand):
                 V[n,:] = xNew #add vertex
-                P[n,:] = xNear #store parent
-                if xNew == self.xGoal:
-                    break #found path, no need for more iterations
+                P[n] = iNear #store parent
+                if np.linalg.norm(xNew - self.x_goal) <= eps and GeometricRRT.is_free_motion(self,self.obstacles,xNew,self.x_goal):
+                    success = True
+                    pathIndex = n
+                    path = [self.x_goal]
+                    while(pathIndex != -1):
+                        path.append(V[pathIndex])
+                        pathIndex = P[pathIndex]
+                    self.path = path
+                    break #found, no need for more iterations
                 else:
                     n = n+1 #increment n
                 
@@ -159,7 +167,14 @@ class RRT(object):
             None, but should modify self.path
         """
         ########## Code starts here ##########
-
+        success = False
+        while not success:
+            success = True
+            for x in range(1, len(self.path)-2):
+                if GeometricRRT.is_free_motion(self,self.obstacles,self.path[x-1],self.path[x+1]):
+                    del self.path[x]
+                    success = False
+                    break
         ########## Code ends here ##########
 
 class GeometricRRT(RRT):
