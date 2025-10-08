@@ -2,7 +2,7 @@
 
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import String
+from std_msgs.msg import Int64, Bool, String
 from geometry_msgs.msg import Twist
 
 class Heartbeat(Node):
@@ -16,6 +16,8 @@ class Heartbeat(Node):
 
         self.hb_timer = self.create_timer(0.2, self.hb_callback)
 
+        self.hb_sub = self.create_subscription(Bool, "/kill", self.hb_emerg, 10)
+
         # self.hb_sub = self.create_subscription(String, "/heartbeat", self.hb_callback, 10)
 
     def hb_callback(self) -> None:
@@ -28,6 +30,16 @@ class Heartbeat(Node):
 
         self.hb_pub.publish(twistMsg)
         # self.hb_timer = self.create_timer(0.2, self.hb_callback)
+
+    def hb_emerg(self, msg:Bool) -> None:
+        if msg.data:
+            self.hb_timer.cancel()
+            twistMsg = Twist()
+            twistMsg.linear.x = 0.0
+            twistMsg.angular.z = 0.0
+
+            self.hb_pub.publish(twistMsg)
+
 
 
 
